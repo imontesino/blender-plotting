@@ -1,0 +1,3 @@
+[submodule "blender_plotting/blender_cli_rendering"]
+	path = blender_plotting/blender_cli_rendering
+	url = https://github.com/yuki-koyama/blender-cli-rendering
