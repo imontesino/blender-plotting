@@ -130,6 +130,9 @@ RUN cp docker_utils/bash.bashrc ~/.bashrc && \
 # test if it works
 RUN python3.10 -c "import bpy;print(dir(bpy.types));print(bpy.app.version_string);"
 
+# install stub file for IDE autocompletion
+RUN pip install blender-stubs==${BLENDER_VERSION}
+
 RUN mkdir $HOME/workspace
 
 WORKDIR /home/${USER}/workspace
