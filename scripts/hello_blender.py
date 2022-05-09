@@ -73,3 +73,6 @@ constraint = cam.constraints.new(type='TRACK_TO')
 constraint.target=cube
 
 cycles_gpu_render(scene, 'hello_blender.png')
+
+# IMPOTANT: Close blender when done
+bpy.ops.wm.quit_blender()

@@ -61,3 +61,6 @@ mat.node_tree.links.new(tex_rough.outputs['Color'], bsdf.inputs['Roughness'])
 
 
 cycles_gpu_render(scn, 'texture_import.png')
+
+# IMPOTANT: Close blender when done
+bpy.ops.wm.quit_blender()

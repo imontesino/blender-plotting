@@ -55,3 +55,6 @@ scene = bpy.context.scene
 scene.camera = cam
 
 cycles_gpu_render(scene, 'hdri_example.png')
+
+# IMPOTANT: Close blender when done
+bpy.ops.wm.quit_blender()
