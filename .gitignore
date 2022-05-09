@@ -4,3 +4,9 @@ renders/
 resources/
 
 .vscode/
+typings/
+
+# Python
+
+__pycache__/
+*.pyc
