@@ -4,8 +4,8 @@ import math
 
 import bpy
 
-from utils.renderers import cycles_gpu_render
-from utils.background import set_hdri_background
+from blender_plotting.utils.renderers import cycles_render, eevee_render, workbench_render
+from blender_plotting.utils.background import set_hdri_background
 
 # Delete the default cube
 bpy.ops.object.delete()
@@ -32,12 +32,12 @@ mat_nodes = mat.node_tree.nodes
 
 mat_nodes['Principled BSDF'].inputs['Base Color'].default_value=(0.5, 0.5, 0.5, 1.0)
 mat_nodes['Principled BSDF'].inputs['Roughness'].default_value=0.0
-mat_nodes['Principled BSDF'].inputs['Metallic'].default_value=0.95
+mat_nodes['Principled BSDF'].inputs['Metallic'].default_value=1.0
 
 
 C = bpy.context
 
-set_hdri_background(C.scene, "resources/hdri/dikhololo_night_8k.exr")
+set_hdri_background(C.scene, "resources/hdri/green_point_park_8k.exr")
 
 # we first create the camera object
 cam_data = bpy.data.cameras.new('camera')
@@ -54,7 +54,9 @@ constraint.target=sphere
 scene = bpy.context.scene
 scene.camera = cam
 
-cycles_gpu_render(scene, 'hdri_example.png')
+cycles_render(scene, 'renders/cycles/hdri_example.png')
+eevee_render(scene, 'renders/eevee/hdri_example.png')
+workbench_render(scene, 'renders/workbench/hdri_example.png')
 
 # IMPOTANT: Close blender when done
 bpy.ops.wm.quit_blender()

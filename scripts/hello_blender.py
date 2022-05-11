@@ -3,7 +3,7 @@ import math
 
 import bpy
 
-from utils.renderers import cycles_gpu_render
+from blender_plotting.utils.renderers import cycles_render, eevee_render, workbench_render
 
 # Delete the default cube
 bpy.ops.object.delete()
@@ -72,7 +72,9 @@ plane_mat_nodes['Principled BSDF'].inputs['Roughness'].default_value=0.0
 constraint = cam.constraints.new(type='TRACK_TO')
 constraint.target=cube
 
-cycles_gpu_render(scene, 'hello_blender.png')
+cycles_render(scene, 'renders/cycles/hello_blender_cycles.png')
+eevee_render(scene, 'renders/eevee/hello_blender_eevee.png')
+workbench_render(scene, 'renders/workbench/hello_blender_workbench.png')
 
 # IMPOTANT: Close blender when done
 bpy.ops.wm.quit_blender()

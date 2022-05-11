@@ -1,11 +1,11 @@
 import bpy
 
-from utils.renderers import cycles_gpu_render
+from blender_plotting.utils.renderers import cycles_render, eevee_render, workbench_render
+
+# from blender_plotting.utils.renderers import cycles_render, eevee_render
 
 C = bpy.context
-scn = C.scene
-
-# bpy.ops.wm.open_mainfile(filepath="resources/textures/castle_brick_02_red_4k/castle_brick_02_red_4k.blend")
+scene = C.scene
 
 TEXTURE_DIR = "resources/textures/castle_brick_02_red_4k/textures/"
 TX_IMG = TEXTURE_DIR+"castle_brick_02_red_diff_4k.jpg"
@@ -18,11 +18,18 @@ bpy.ops.object.delete()
 
 bpy.ops.mesh.primitive_uv_sphere_add()
 
-# save cube to variable
-cube = bpy.context.active_object
+# save sphere to variable
+sphere = bpy.context.active_object
+
+# add subdivision
+bpy.ops.object.modifier_add(type='SUBSURF')
+
+sphere.modifiers[0].render_levels = 6
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.faces_shade_smooth()
 
 mat = bpy.data.materials.new(name="Brick_material")
-cube.data.materials.append(mat)
+sphere.data.materials.append(mat)
 mat.use_nodes=True
 
 nodes = mat.node_tree.nodes
@@ -60,7 +67,9 @@ tex_rough.image = bpy.data.images.load(TX_ROUGH)
 mat.node_tree.links.new(tex_rough.outputs['Color'], bsdf.inputs['Roughness'])
 
 
-cycles_gpu_render(scn, 'texture_import.png')
+cycles_render(scene, 'renders/cycles/texture_import.png')
+eevee_render(scene, 'renders/eevee/texture_import.png')
+workbench_render(scene, 'renders/workbench/texture_import.png')
 
 # IMPOTANT: Close blender when done
 bpy.ops.wm.quit_blender()
