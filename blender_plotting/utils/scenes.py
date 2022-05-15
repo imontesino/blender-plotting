@@ -2,7 +2,6 @@ from typing import Iterable
 
 import bpy
 import numpy as np
-from mathutils import Vector
 
 from .camera import add_camera
 from .utils import clean_objects
@@ -20,7 +19,7 @@ def create_2d_scene(x_lim: Iterable[float],
 
     scene = bpy.context.scene
 
-    diagonal = (x_lim[1] - x_lim[0])**2 + (y_lim[1] - y_lim[0])**2
+    diagonal = np.sqrt( (x_lim[1] - x_lim[0])**2 + (y_lim[1] - y_lim[0])**2 )
 
     camera_height = diagonal / (2 * np.tan(fov / 2.0))
 
