@@ -10,3 +10,12 @@ typings/
 
 __pycache__/
 *.pyc
+*.egg-info/
+
+build/
+
+# Video files
+*.mkv
+*.mp4
+*.avi
+*.mov
