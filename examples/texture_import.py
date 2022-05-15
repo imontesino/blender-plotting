@@ -67,8 +67,8 @@ tex_rough.image = bpy.data.images.load(TX_ROUGH)
 mat.node_tree.links.new(tex_rough.outputs['Color'], bsdf.inputs['Roughness'])
 
 
-cycles_render(scene, 'renders/cycles/texture_import.png')
-eevee_render(scene, 'renders/eevee/texture_import.png')
+# cycles_render(scene, 'renders/cycles/texture_import.png')
+# eevee_render(scene, 'renders/eevee/texture_import.png')
 workbench_render(scene, 'renders/workbench/texture_import.png')
 
 # IMPOTANT: Close blender when done
