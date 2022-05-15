@@ -1,11 +1,12 @@
 """ Material creation and utility functions"""
 
 from typing import Optional, Tuple, Union
+import uuid
 
 import bpy
 
-def create_material_from_pbr(name: str,
-                             base_image_file: str,
+def create_material_from_pbr(base_image_file: str,
+                             name: Optional[str] = None,
                              scale: float = 1.0,
                              normal_file: Optional[str] = None,
                              specular_file: Optional[str] = None,
@@ -32,6 +33,12 @@ def create_material_from_pbr(name: str,
     Returns:
         bpy.types.Material: The created material.
     """
+
+    # Create unique name if not given
+    if name is None:
+        # Create a unique name
+        name = 'PBR_Material_' + str(uuid.uuid4())
+
 
     mat = bpy.data.materials.new(name=name)
     mat.use_nodes=True
@@ -128,15 +135,21 @@ def create_material_from_pbr(name: str,
     return mat
 
 
-def create_solid_material(name: str,
-                          base_color: Union[Tuple[float, float, float, float],str] = (0.6, 0.6, 0.6, 1.0))-> bpy.types.Material:
+def create_solid_material(base_color: Union[Tuple[float, float, float, float],str] = (0.6, 0.6, 0.6, 1.0),
+                          name: Optional[str] = None)-> bpy.types.Material:
     """Create a solid material.
 
     Args:
         name (str): Name of the material.
-        base_color (Union[Tuple[float, float, float, float],str]): Base color of the material. Either
-            as a tuple (r, g, b, a) or as a filepath to an image. Default is (0.6, 0.6, 0.6, 1.0).
+        base_color (Union[Tuple[float, float, float, float],str]): Base color of the material.
+            Either as a tuple (r, g, b, a) or as a filepath to an image.
+            Default is (0.6, 0.6, 0.6, 1.0).
     """
+
+    # Create unique name if not given
+    if name is None:
+        # Create a unique name
+        name = 'Solid_Material_' + str(uuid.uuid4())
 
     # Create the material
     mat = bpy.data.materials.new(name=name)
@@ -149,8 +162,28 @@ def create_solid_material(name: str,
     mat.node_tree.links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
 
 
+    # Create mapping for all the inputs
+    mapping_node = nodes.new('ShaderNodeMapping')
+    tex_coord = nodes.new('ShaderNodeTexCoord')
+    mat.node_tree.links.new(tex_coord.outputs['UV'], mapping_node.inputs['Vector'])
+
+    # Create an link base image texture node
+    tex_image = nodes.new('ShaderNodeTexImage')
+
+    # This allows the workbench to use the image as a texture
+    if name is not None:
+        image_name = name+"texture_image"
+    else:
+        image_name = None
+    image = bpy.data.images.new(name=image_name, width=1, height=1, tiled=True)
+    image.generated_type = 'BLANK'
+    image.generated_color = base_color
+    image.source = 'GENERATED'
+    image.use_fake_user = True
+    tex_image.image = image
+    mat.node_tree.links.new(tex_image.outputs['Color'], bsdf.inputs['Base Color'])
+
     # Create the principled BSDF node
-    bsdf.inputs['Base Color'].default_value = base_color
     bsdf.inputs['Roughness'].default_value = 1.0
     bsdf.inputs['Metallic'].default_value = 0.0
     bsdf.inputs['Specular'].default_value = 0.0
