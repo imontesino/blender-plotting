@@ -1,11 +1,28 @@
-from typing import Iterable
+from typing import Iterable, Tuple
 
 import bpy
 import numpy as np
 
 from .camera import add_camera
 from .utils import clean_objects
+from .shapes import add_arrow
 
+def draw_xy_axes(axes_length: float = 1.0,
+                 origin: Tuple[float, float, float] = (0, 0, 0)):
+
+    origin = np.array([0, 0, 0])
+
+    vector = np.array([1, 0, 0]) * axes_length
+    x_axis = add_arrow(origin, vector,
+                       name = 'x_axis',
+                       color = (1, 0, 0, 1.0))
+
+    vector = np.array([0, 1, 0]) * axes_length
+    y_axis = add_arrow(origin, vector,
+                       name = 'y_axis',
+                       color = (0, 1, 0, 1.0))
+
+    return x_axis, y_axis
 
 def create_2d_scene(x_lim: Iterable[float],
                     y_lim: Iterable[float],
