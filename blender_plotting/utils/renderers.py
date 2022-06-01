@@ -1,6 +1,38 @@
 from typing import List
 import bpy
 
+def bake_textures():
+    """Bake all the textures in the scene."""
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
+
+def common_setup(scene: bpy.types.Scene):
+    scene.render.use_persistent_data = True
+
+
+def set_animation(scene: bpy.types.Scene,
+                  fps: int = 24,
+                  frame_start: int = 1,
+                  frame_end: int = 48,
+                  frame_current: int = 1,
+                  file_format: str = 'FFMPEG') -> None:
+    """ Set the scene to render an animation.
+
+    Args:
+        scene (bpy.types.Scene): The scene to set.
+        fps (int, optional): The frames per second. Defaults to 24.
+        frame_start (int, optional): The first frame. Defaults to 1.
+        frame_end (int, optional): The last frame. Defaults to 48.
+        frame_current (int, optional): The current frame. Defaults to 1.
+        file_format (str, optional): The file extension. Defaults to 'FFMPEG'.
+    """
+    scene.render.fps = fps
+    scene.frame_start = frame_start
+    scene.frame_end = frame_end
+    scene.frame_current = frame_current
+    scene.render.image_settings.file_format = file_format
+    if file_format == 'FFMPEG':
+        scene.render.ffmpeg.codec = 'H264'
 
 def cycles_render(scene: bpy.types.Scene,
                   file_name: str,
@@ -19,6 +51,8 @@ def cycles_render(scene: bpy.types.Scene,
         resolution_y (int, optional): Defaults to 1080.
         samples (int, optional): Defaults to 128.
     """
+    common_setup(scene)
+
     if animation:
         file_name = "animation/" + file_name
         scene.render.filepath = file_name+".avi"
@@ -45,8 +79,8 @@ def cycles_render(scene: bpy.types.Scene,
             print(d["name"], d["use"])
 
         # set tile size to 256x256
-        bpy.context.scene.cycles.tile_x = 256
-        bpy.context.scene.cycles.tile_y = 256
+        bpy.context.scene.cycles.tile_x = 2048
+        bpy.context.scene.cycles.tile_y = 2048
     else:
         # Set the device_type
         bpy.context.preferences.addons[
@@ -59,6 +93,8 @@ def cycles_render(scene: bpy.types.Scene,
         bpy.context.scene.cycles.tile_x = 64
         bpy.context.scene.cycles.tile_y = 64
 
+    # Set Optix as denoiser
+    # bpy.context.scene.view_layers['View Layer'].cycles.use_denoising = True
 
     # set resolution to 4k
     bpy.context.scene.render.resolution_x = resolution_x
@@ -83,6 +119,8 @@ def eevee_render(scene: bpy.types.Scene,
         resolution_x (int, optional): Defaults to 1920.
         resolution_y (int, optional): Defaults to 1080.
     """
+    common_setup(scene)
+
     # Prevent segfault
     # TODO find cause
     rm_objects = remove_subsurf_modifiers(scene)
@@ -113,6 +151,8 @@ def workbench_render(scene: bpy.types.Scene,
 
     Very fast render for prototiping animations and positions.
     """
+    common_setup(scene)
+
     # Prevent segfault
     # TODO find cause
     rm_objects = remove_subsurf_modifiers(scene)
