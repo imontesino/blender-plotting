@@ -171,10 +171,7 @@ def create_solid_material(base_color: Union[Tuple[float, float, float, float],st
     tex_image = nodes.new('ShaderNodeTexImage')
 
     # This allows the workbench to use the image as a texture
-    if name is not None:
-        image_name = name+"texture_image"
-    else:
-        image_name = None
+    image_name = name+"texture_image"
     image = bpy.data.images.new(name=image_name, width=1, height=1, tiled=True)
     image.generated_type = 'BLANK'
     image.generated_color = base_color
@@ -192,3 +189,27 @@ def create_solid_material(base_color: Union[Tuple[float, float, float, float],st
 
     return mat
 
+
+def recolor_material(material: bpy.types.Material,
+                     base_color: Union[Tuple[float, float, float, float],str] = (0.6, 0.6, 0.6, 1.0),
+                     name: Optional[str] = None)-> bpy.types.Material:
+    """Recolors a material.
+
+    Args:
+        material (bpy.types.Material): Material to be recolored.
+        base_color (Union[Tuple[float, float, float, float],str]): Base color of the material.
+            Either as a tuple (r, g, b, a) or as a filepath to an image.
+            Default is (0.6, 0.6, 0.6, 1.0).
+        name (str): Name of the material.
+    """
+
+    name = material.name
+    tex_image = material.node_tree.nodes['Image Texture']
+
+    image_name = name+"texture_image"+str(uuid.uuid4())
+    image = bpy.data.images.new(name=image_name, width=1, height=1, tiled=True)
+    image.generated_type = 'BLANK'
+    image.generated_color = base_color
+    image.source = 'GENERATED'
+    image.use_fake_user = True
+    tex_image.image = image
