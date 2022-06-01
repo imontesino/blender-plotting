@@ -14,6 +14,8 @@ from blender_plotting.utils.shapes import add_arrow
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Draw a R2 plane.')
+    parser.duration = parser.add_argument('--duration', type=float, default=10,
+                                          help='Animation duration in seconds.')
     parser.add_argument('--cycles', action='store_true', help='Use Cycles.')
     parser.add_argument('--eevee', action='store_true', help='Use Eevee.')
 
@@ -155,7 +157,7 @@ def main():
     args = parse_args()
 
     FPS = 60
-    DURATION = 15
+    DURATION = 2
     TOTAL_FRAMES =  FPS * DURATION
 
     # Plot limits

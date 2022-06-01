@@ -1,5 +1,4 @@
 import argparse
-import subprocess
 from typing import Callable, Tuple, List
 
 import bpy
@@ -151,11 +150,23 @@ def main():
 
     f = lambda x: 1.5 * np.sin(10*x) /9
 
+
+
     # Draw the function
     curve = draw_function(f, -3, 3, control_points=200)
 
     # Draw the points
     points = draw_points([(x, f(x), 0) for x in np.linspace(-3, 3, 5)], (0, 1, 0, 1.0))
+
+
+    print(points[0].material_slots[0].material)
+    mat_nodes = points[0].material_slots[0].material.node_tree.nodes
+    print(mat_nodes)
+
+    for node in mat_nodes:
+        if node.name == "Image Texture":
+            print(node.image)
+
 
     # Render the scene
     imf_filename = 'draw_function.png'
