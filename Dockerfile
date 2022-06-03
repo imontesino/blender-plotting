@@ -158,11 +158,6 @@ ARG BLENDER_VERSION=3.1
 
 WORKDIR /home/${USER}/
 
-RUN echo "alias python=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
-RUN echo "alias python3=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
-RUN echo "alias pip='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
-RUN echo "alias pip3='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
-
 RUN sudo cp /home/${USER}/blender_tmp/build_linux_bpy/bin/bpy.so /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages
 RUN sudo cp -r /home/${USER}/blender_tmp/build_linux_bpy/bin/${BLENDER_VERSION} /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages/
 RUN sudo cp -r /home/${USER}/blender_tmp/lib/linux_centos7_x86_64/python/lib/python${PYTHON_MAJ_MIN}/* /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages/
@@ -176,6 +171,12 @@ RUN cp docker_utils/bash.bashrc ~/.bashrc && \
     # Allow bash autocompletion
     sudo apt-get install -y bash-completion && \
     source /usr/share/bash-completion/completions/git
+
+# set the chosen python version as the default
+RUN echo "alias python=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
+RUN echo "alias python3=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
+RUN echo "alias pip='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
+RUN echo "alias pip3='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
 
 # # test if it works
 RUN python${PYTHON_MAJ_MIN} -c "import bpy;print(dir(bpy.types));print(bpy.app.version_string);"
