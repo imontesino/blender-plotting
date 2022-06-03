@@ -5,8 +5,8 @@ docker run -t -d \
     --gpus all \
     --net host \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $PWD:/workspace \
-    -e DISPLAY=unix$DISPLAY \
+    -v $PWD:/home/docker/workspace \
+    -e DISPLAY=$DISPLAY \
     --name belnder-plot-dev \
     blender-py
 ```

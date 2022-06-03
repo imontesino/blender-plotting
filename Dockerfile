@@ -1,4 +1,7 @@
-FROM nvidia/cuda:11.3.0-devel-ubuntu20.04
+ARG BASE_IMAGE=ubuntu:20.04
+
+#-- Setup common build envorinment for all versions --#
+FROM ${BASE_IMAGE} AS base
 
 LABEL mantainer="Ignacio Montesino"
 
@@ -14,16 +17,38 @@ ENV LC_ALL en_US.UTF-8
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-ARG PYTHON_VER_MAJ=3.10
-ARG BLENDER_VERSION=3.1.2
 ARG USER=docker
+
+# install sudo
+RUN apt-get -y install sudo
+
+# Create new user `${USER}` and disable
+# password and gecos for later
+# --gecos explained well here:
+# https://askubuntu.com/a/1195288/635348
+RUN adduser --disabled-password \
+    --gecos '' ${USER}
+
+#  Add new user ${USER} to sudo group
+RUN adduser ${USER} sudo
+
+# Ensure sudo group users are not
+# asked for a password when using
+# sudo command by ammending sudoers file
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
+/etc/sudoers
+
+# now we can set USER to the
+# user we just created
+USER ${USER}
+
 
 # Run the next steps with bash
 SHELL ["/bin/bash", "-c"]
 
 # Dependencies
-RUN apt-get update
-RUN apt-get -y install \
+RUN sudo apt-get update
+RUN sudo apt-get -y install \
     build-essential \
     bzip2 \
     cmake \
@@ -49,92 +74,121 @@ RUN apt-get -y install \
     subversion \
     sudo \
     wget \
-    zlib1g-dev
+    zlib1g-dev \
+    ffmpeg
+    # ffmpeg is required to save videos as mp4
 
 
-# Install blender
-# https://wiki.blender.org/wiki/Building_Blender/Linux/Ubuntu
+# create the directory structure for blender source and dependencies
+
+RUN mkdir -p /home/${USER}/blender_tmp/
 
 # Get the source code
-WORKDIR /home/tmp
+WORKDIR /home/${USER}/blender_tmp/
 RUN git clone https://git.blender.org/blender.git
-# Get the dependencies
-WORKDIR /home/tmp/lib
-RUN svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/linux_centos7_x86_64  # works for debian
 
-WORKDIR /home/tmp/blender
 
-# Checkout the desired version and clone the submodules
-RUN git checkout -b v${BLENDER_VERSION} && \
-    git submodule update --init --recursive
 
-# Build blender as a python module
-RUN make bpy
+#-- Build blender for specified blender and python versions --#
+FROM base as blender_builder
 
-# Create new user `${USER}` and disable
-# password and gecos for later
-# --gecos explained well here:
-# https://askubuntu.com/a/1195288/635348
-RUN adduser --disabled-password \
-    --gecos '' ${USER}
+# ARGS are forgotten when building new intermediate image
+ARG PYTHON_MAJ_MIN=3.10
+ARG BLENDER_GH_TAG=3.1
+ARG USER=docker
 
-#  Add new user ${USER} to sudo group
-RUN adduser ${USER} sudo
-
-# Ensure sudo group users are not
-# asked for a password when using
-# sudo command by ammending sudoers file
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
-/etc/sudoers
-
-# now we can set USER to the
-# user we just created
-USER ${USER}
-
-WORKDIR /home/${USER}/
-
-# install python 3.10 fo the user
+# install python to build blender
 RUN sudo apt-get install software-properties-common -y &&\
     sudo add-apt-repository -y ppa:deadsnakes/ppa && \
     sudo apt-get update && \
     sudo apt-get install -y \
-    python${PYTHON_VER_MAJ} \
-    python${PYTHON_VER_MAJ}-dev \
-    python${PYTHON_VER_MAJ}-venv \
-    python${PYTHON_VER_MAJ}-gdbm \
-    python${PYTHON_VER_MAJ}-tk \
-    python${PYTHON_VER_MAJ}-distutils
+    python${PYTHON_MAJ_MIN} \
+    python${PYTHON_MAJ_MIN}-dev \
+    python${PYTHON_MAJ_MIN}-venv \
+    python${PYTHON_MAJ_MIN}-gdbm \
+    python${PYTHON_MAJ_MIN}-tk \
+    python${PYTHON_MAJ_MIN}-distutils
 
 # install pip
-RUN sudo curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+RUN sudo curl -sS https://bootstrap.pypa.io/get-pip.py | python${PYTHON_MAJ_MIN}
 
-RUN echo "alias python=python${PYTHON_VER_MAJ}" >> ~/.bashrc
-RUN echo "alias python3=python${PYTHON_VER_MAJ}" >> ~/.bashrc
-RUN echo "alias pip='python${PYTHON_VER_MAJ} -m pip'" >> ~/.bashrc
-RUN echo "alias pip3='python${PYTHON_VER_MAJ} -m pip'" >> ~/.bashrc
+WORKDIR /home/${USER}/blender_tmp/blender
 
-RUN sudo cp /home/tmp/build_linux_bpy/bin/bpy.so /usr/local/lib/python$PYTHON_VER_MAJ/dist-packages
-RUN sudo cp -r /home/tmp/lib/linux_centos7_x86_64/python/lib/python$PYTHON_VER_MAJ/* /usr/local/lib/python$PYTHON_VER_MAJ/dist-packages/
-RUN sudo cp -r /home/tmp/lib/linux_centos7_x86_64/python/lib/python3.10/site-packages/3.3/ /usr/local/lib/python$PYTHON_VER_MAJ/dist-packages/
+# Checkout the desired version and clone the submodules
+RUN git checkout ${BLENDER_GH_TAG} && \
+    git submodule update --init --recursive
+
+# Copy the modified bpy cmake variables
+COPY docker_utils/bpy_module.cmake /home/${USER}/blender_tmp/blender/build_files/cmake/config
+
+# Get the dependencies
+ARG BLENDER_SVN_DEPS_TAG=blender-3.1-release
+
+# TODO make optional through arguments or separate dockerfiles?
+# use prebuilt dependencies
+RUN mkdir -p /home/${USER}/blender_tmp/lib
+WORKDIR /home/${USER}/blender_tmp/lib
+RUN svn checkout https://svn.blender.org/svnroot/bf-blender/tags/${BLENDER_SVN_DEPS_TAG}/lib/linux_centos7_x86_64/
+
+# # Dependencies for building the blender dependencies
+# RUN sudo apt-get install -y autoconf automake libtool yasm nasm tcl
+# # command to build dependencies
+# RUN cmake -H /build_files/build_environment \
+# 	      -B build_linux/deps \
+#           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+# 	      -DHARVEST_TARGET=/home/${USER}/blender_tmp/lib/linux/ \
+#           --log-level=ERROR
+# # build dependencies
+# RUN make -C build_linux/deps -j $(NPROCS)
+# # install dependencies
+# RUN sudo make -C build_linux/deps install
+
+WORKDIR /home/${USER}/blender_tmp/blender
+RUN make bpy
+# BUILD_CMAKE_ARGS="-D PYTHON_VERSION=${PYTHON_MAJ_MIN} -D CMAKE_POSITION_INDEPENDENT_CODE=ON -U --log-level=ERROR"
+
+#-- Install blender and other utilities for usage in docker --#
+
+FROM blender_builder AS blender_installer
+
+# ARGS are forgotten when building new intermediate image
+ARG PYTHON_MAJ_MIN=3.10
+ARG USER=docker
+ARG BLENDER_VERSION=3.1
+
+WORKDIR /home/${USER}/
+
+RUN echo "alias python=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
+RUN echo "alias python3=python${PYTHON_MAJ_MIN}" >> ~/.bashrc
+RUN echo "alias pip='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
+RUN echo "alias pip3='python${PYTHON_MAJ_MIN} -m pip'" >> ~/.bashrc
+
+RUN sudo cp /home/${USER}/blender_tmp/build_linux_bpy/bin/bpy.so /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages
+RUN sudo cp -r /home/${USER}/blender_tmp/build_linux_bpy/bin/${BLENDER_VERSION} /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages/
+RUN sudo cp -r /home/${USER}/blender_tmp/lib/linux_centos7_x86_64/python/lib/python${PYTHON_MAJ_MIN}/* /usr/local/lib/python${PYTHON_MAJ_MIN}/dist-packages/
 
 COPY docker_utils/ /home/${USER}/docker_utils/
 
 RUN cp docker_utils/bash.bashrc ~/.bashrc && \
-    python${PYTHON_VER_MAJ} -m pip completion --bash >> ~/.bashrc && \
+    python${PYTHON_MAJ_MIN} -m pip completion --bash >> ~/.bashrc && \
     # Optional: Colorful bash prompt
     cat docker_utils/.docker-prompt  >> ~/.bashrc && \
     # Allow bash autocompletion
     sudo apt-get install -y bash-completion && \
     source /usr/share/bash-completion/completions/git
 
-# test if it works
-RUN python3.10 -c "import bpy;print(dir(bpy.types));print(bpy.app.version_string);"
+# # test if it works
+RUN python${PYTHON_MAJ_MIN} -c "import bpy;print(dir(bpy.types));print(bpy.app.version_string);"
+
+RUN sudo apt-get install python3-pip -y
 
 # install stub file for IDE autocompletion
-RUN pip install blender-stubs==${BLENDER_VERSION}
+ARG BPY_STUB_VERSION=3.1.0.26.dev2145740619
+RUN pip install blender-stubs==${BPY_STUB_VERSION}
 
 RUN mkdir $HOME/workspace
 
 WORKDIR /home/${USER}/workspace
 
-CMD bash
+# Set entrypoint as bash after loading bashrc
+ENTRYPOINT ["/bin/bash"]

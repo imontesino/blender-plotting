@@ -1,0 +1,4 @@
+blender_version,blender_gh_tag,blender_svn_deps_tag,python_min_version,bpy_stubs
+3.1,blender-v3.1-release,blender-3.1-release,3.10,3.1.0.26.dev2145740619
+2.93,blender-v2.93-release,blender-2.93-release,3.9,2.93.27
+2.83,blender-v2.83-release,blender-2.83.1-release,3.7,2.83.27

@@ -19,3 +19,6 @@ build/
 *.mp4
 *.avi
 *.mov
+
+# generated build templates
+docker_utils/bpy_module.cmake
