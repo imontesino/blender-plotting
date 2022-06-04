@@ -73,10 +73,9 @@ def cycles_render(scene: bpy.types.Scene,
 
         # get_devices() to let Blender detects GPU device
         bpy.context.preferences.addons["cycles"].preferences.get_devices()
-        print(bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
-        for d in bpy.context.preferences.addons["cycles"].preferences.devices:
-            d["use"] = 1 # Using all devices, include GPU and CPU
-            print(d["name"], d["use"])
+
+        # for d in bpy.context.preferences.addons["cycles"].preferences.devices:
+        #     print(d["name"], d["use"])
 
         # set tile size to 256x256
         bpy.context.scene.cycles.tile_x = 2048
