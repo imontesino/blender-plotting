@@ -136,6 +136,9 @@ def create_material_from_pbr(base_image_file: str,
 
 
 def create_solid_material(base_color: Union[Tuple[float, float, float, float],str] = (0.6, 0.6, 0.6, 1.0),
+                          roughness: float = 0.8,
+                          metallic: float = 0.7,
+                          specular: float = 0.5,
                           name: Optional[str] = None)-> bpy.types.Material:
     """Create a solid material.
 
@@ -159,33 +162,17 @@ def create_solid_material(base_color: Union[Tuple[float, float, float, float],st
     # Create principled BSDF node
     bsdf = nodes["Principled BSDF"]
     output = nodes["Material Output"]
-    mat.node_tree.links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
-
-
-    # Create mapping for all the inputs
-    mapping_node = nodes.new('ShaderNodeMapping')
-    tex_coord = nodes.new('ShaderNodeTexCoord')
-    mat.node_tree.links.new(tex_coord.outputs['UV'], mapping_node.inputs['Vector'])
-
-    # Create an link base image texture node
-    tex_image = nodes.new('ShaderNodeTexImage')
-
-    # This allows the workbench to use the image as a texture
-    image_name = name+"texture_image"
-    image = bpy.data.images.new(name=image_name, width=1, height=1, tiled=True)
-    image.generated_type = 'BLANK'
-    image.generated_color = base_color
-    image.source = 'GENERATED'
-    image.use_fake_user = True
-    tex_image.image = image
-    mat.node_tree.links.new(tex_image.outputs['Color'], bsdf.inputs['Base Color'])
 
     # Create the principled BSDF node
-    bsdf.inputs['Roughness'].default_value = 1.0
-    bsdf.inputs['Metallic'].default_value = 0.0
-    bsdf.inputs['Specular'].default_value = 0.0
+    bsdf.inputs['Base Color'].default_value = base_color
+    bsdf.inputs['Roughness'].default_value = roughness
+    bsdf.inputs['Metallic'].default_value = metallic
+    bsdf.inputs['Specular'].default_value = specular
     bsdf.inputs['Emission'].default_value = (0.0, 0.0, 0.0, 1.0)
+    bsdf.inputs['Alpha'].default_value = base_color[3]
 
+    # For workbench renderer
+    mat.diffuse_color = base_color
 
     return mat
 

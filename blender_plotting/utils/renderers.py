@@ -173,7 +173,7 @@ def workbench_render(scene: bpy.types.Scene,
     # display material color
     shading = scene.display.shading
     shading.light = 'STUDIO'
-    shading.color_type = 'TEXTURE'
+    shading.color_type = 'MATERIAL'
 
     scene.render.resolution_x = resolution_x
     scene.render.resolution_y = resolution_y
