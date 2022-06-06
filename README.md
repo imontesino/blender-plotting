@@ -38,13 +38,20 @@ docker run -t -d \
 ### Notes
 
 - blender 2.83 is not compiling correctly at the moment.
-- you can copy the compiled module from the cotainer to the host machine if you have the basic dependencies and same python version
+- you can copy the compiled module from the cotainer to the host machine if you have the basic dependencies and same
+  python version
 ```bash
 docker cp belnder-plot-dev:/home/docker/blender_tmp/build_linux_bpy/bin/bpy.so <path-to-python3.10-packages>
 docker cp -r belnder-plot-dev:/home/docker/blender_tmp/build_linux_bpy/bin/3.1 <path-to-python3.10-packages>
 ```
- - compiling blender uses all the cores and is prone to run out of memory if you do not have enough RAM. Use the `--builder_cpus N` flag in the builder program to set the number of cores to use.
- - `FFMPEG` support is not correcly set. Animations can be saved as `.avi` and then converted to `.mp4` using the `ffmpeg` cli tools.
+ - compiling blender uses all the cores and is prone to run out of memory if you do not have enough RAM. Use the
+   `--builder_cpus N` flag in the builder program to set the number of cores to use.
+ - `FFMPEG` support is not correcly set. Animations can be saved as `.avi` and then converted to `.mp4` using the
+   `ffmpeg` cli tools.
+
+ - At the end of every script `bpy.ops.wm.quit_blender()` must be called to exit blender. Failings to do so will result
+   in blender running in the background consuming a lot of processor time. If the computer starts to feel slow check
+   `top` to look fo any processes with 100% CPU usage.
 
  ## See also
 
