@@ -1,12 +1,13 @@
-from typing import Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import bpy
+import bmesh
 import mathutils
 import numpy as np
 from blender_plotting.utils.materials import create_solid_material
 
 
-def add_arrow(vector_origin: np.ndarray,
+def draw_arrow(vector_origin: np.ndarray,
               vector_end: np.ndarray,
               name: Optional[str] = None,
               thickness: float = 1,
@@ -23,6 +24,10 @@ def add_arrow(vector_origin: np.ndarray,
     Returns:
         Tuple[bpy.types.Object, bpy.types.Object]: The arrow body and the arrow head.
     """
+    # as np.array
+    vector_origin = np.array(vector_origin)
+    vector_end = np.array(vector_end)
+
 
     if vector_origin.size == 2:
         vector_origin = np.append(vector_origin, 0)
@@ -79,3 +84,58 @@ def add_arrow(vector_origin: np.ndarray,
     cone.data.materials.append(arrow_mat)
 
     return (cylinder, cone)
+
+def draw_points(points: Iterable[Tuple[float, float, float]],
+                color: Tuple[float, float, float, float] = (1, 0, 0, 1.0),
+                radius: float = 0.05) -> List[bpy.types.Object]:
+    """Draws a list of points.
+
+    Args:
+        points (List[Tuple[float, float, float]]): List of points.
+        color (Tuple[float, float, float, float]): Color of the points.
+        radius (float): Radius of the points.
+
+    Returns:
+        List[bpy.types.Object]: List of points.
+    """
+
+    points_objs = []
+
+    for point in points:
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=point)
+        points_objs.append(bpy.context.object)
+        bpy.context.object.data.materials.append(create_solid_material(color))
+        # shade smooth
+        bpy.ops.object.shade_smooth()
+
+    return points_objs
+
+
+def draw_sphere(center: Tuple[float, float, float],
+                radius: float,
+                segments: int = 32,
+                rings: int = 16,
+                color: Tuple[float, float, float, float] = (1, 0, 0, 1.0)):
+    """Draws a sphere.
+
+    Args:
+        center (Tuple[float, float, float]): Center of the sphere.
+        radius (float): Radius of the sphere.
+        color (Tuple[float, float, float, float]): Color of the sphere.
+
+    Returns:
+        bpy.types.Object: The sphere.
+    """
+
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=radius,
+                                         location=center,
+                                         segments=segments,
+                                         ring_count=rings)
+    sphere = bpy.context.object
+    sphere.data.materials.append(create_solid_material(color))
+
+    # shade smooth
+    for face in sphere.data.polygons:
+        face.use_smooth = True
+
+    return sphere
