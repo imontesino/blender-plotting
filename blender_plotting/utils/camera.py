@@ -1,7 +1,7 @@
 """ Conveniance functions for camera """
 
 import math
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Tuple, Union
 
 import bpy
 import mathutils
@@ -10,7 +10,7 @@ def add_camera(name: str,
                location: tuple,
                fov: float,
                rotation: tuple = (0, 0, 0),
-               track_to: Optional[bpy.types.Object] = None,
+               track_to: Optional[Union[bpy.types.Object, Tuple[float,float,float]]] = None,
                scene: Optional[bpy.types.Scene] = None) -> bpy.types.Object:
     """Add a camera to the scene.
 
@@ -19,7 +19,10 @@ def add_camera(name: str,
         location (tuple): The location of the camera.
         fov (float): The field of view of the camera.
         aspect_ratio (float): The aspect ratio of the camera.
-        track_to (Optional[bpy.types.Object], optional): The object to track.
+        rotation (tuple, optional): The rotation of the camera. Defaults to (0, 0, 0).
+        track_to (Optional[Union[bpy.types.Object, Tuple[float,float,float]]], optional):
+            Point the camera to a bpy.types.Object or a position in 3d space. Overrides rotation.
+            Defaults to None.
         scene (Optional[bpy.types.Scene], optional): The scene to add the camera to.
 
     Returns:
@@ -34,9 +37,11 @@ def add_camera(name: str,
     cam.data.angle = math.radians(fov)
 
     if track_to is not None:
-        # track the cube with the camera
-        constraint = cam.constraints.new(type='TRACK_TO')
-        constraint.target=track_to
+        if isinstance(track_to, bpy.types.Object):
+            constraint = cam.constraints.new(type='TRACK_TO')
+            constraint.target=track_to
+        else:
+            point_at(cam, track_to)
 
     if scene is not None:
         # add camera to scene
@@ -81,3 +86,19 @@ def point_at(obj: bpy.types.Object,
     # using * still works but results in unexpected behaviour!
     obj.matrix_world = quat @ roll_matrix
     obj.location = loc
+
+def get_perspective(camera):
+    """Compute projection matrix of blender camera.
+
+    Arguments:
+        camera {bpy.types.Camera} -- Blender camera.
+
+    Returns:
+        mathutils.Matrix -- Projection matrix.
+    """
+    return camera.calc_matrix_camera(
+        depsgraph=bpy.context.evaluated_depsgraph_get(),
+        x=bpy.context.scene.render.resolution_x,
+        y=bpy.context.scene.render.resolution_y,
+        scale_x=bpy.context.scene.render.pixel_aspect_x,
+        scale_y=bpy.context.scene.render.pixel_aspect_y)
