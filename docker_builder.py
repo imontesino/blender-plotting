@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ CLI Tool to build bpy docker images and package the python modules.
 """
 import argparse
@@ -13,11 +14,14 @@ def parse_args():
                         help='Build container for that blender version.')
     parser.add_argument('--python_version', '--py', type=str, default=None,
                         help='Build container to build the module for that python version.')
-    parser.add_argument('--build_all', action='store_true', help='Build all blender versions.')
     parser.add_argument('--gpu', action='store_true', help='Build container with GPU support.')
-    parser.add_argument('--tag', '-t', type=str, default=None,
+    parser.add_argument('--gpu_image', type=str, default='nvidia/cuda:11.3.0-devel-ubuntu20.04',
+                        help='GPU image to use for the GPU build. IMPORTANT: must match the drivers in the host pc.')
+    parser.add_argument('--tag', '-t', type=str, default='None',
                         help='Tag for the docker image.')
     parser.add_argument('--no_cache', action='store_true', help='Build without cache.')
+    parser.add_argument('--builder_cpus', type=int, default=0,
+                        help='Number of CPUs to use for the build.')
     parser.add_argument('--dummy', action='store_true',
                         help='Print the docker build command without executing it.')
     args = parser.parse_args()
@@ -50,9 +54,11 @@ def main():
 
     blender_version = args.blender_version
     python_version = args.python_version
-    build_all = args.build_all
     gpu_support = args.gpu
     image_tag = args.tag
+    builder_cpus = args.builder_cpus
+
+
 
     # Read the csv as strings
     df = pd.read_csv ('blender_python_table.csv', converters={i: str for i in range(100)})
@@ -91,7 +97,7 @@ def main():
     if image_tag is None:
         IMAGE_TAG = f'bpy-{PYTHON_MAJ_MIN}'
     if gpu_support:
-        BASE_IMAGE = 'nvidia/cuda:11.3.0-devel-ubuntu20.04'
+        BASE_IMAGE = args.gpu_image
         IMAGE_TAG += '-gpu'
     else:
         BASE_IMAGE = 'ubuntu:20.04'
@@ -103,6 +109,9 @@ def main():
     build_command = f'docker build -t {IMAGE_TAG}:{blender_version}'
     if args.no_cache:
         build_command += ' --no-cache'
+        # set number of cpus via --cpuset-mems
+    if builder_cpus > 0:
+        build_command += f" --cpuset-cpus=0-{builder_cpus - 1}"
     build_command += f' --build-arg USER={USER}'
     build_command += f' --build-arg BASE_IMAGE={BASE_IMAGE}'
     build_command += f' --build-arg BLENDER_VERSION={blender_version}'
