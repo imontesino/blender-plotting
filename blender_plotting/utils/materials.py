@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Union
 import uuid
 
 import bpy
+import numpy as np
 
 def create_material_from_pbr(base_image_file: str,
                              name: Optional[str] = None,
@@ -15,6 +16,7 @@ def create_material_from_pbr(base_image_file: str,
                              displacement_file: Optional[str] = None,
                              displacement_scale: float = 1.0,
                              occlusion_file: Optional[str] = None,
+                             true_displacement: bool = False,
                              subsurface_file: Optional[str] = None) -> bpy.types.Material:
     """Create a new material from PBR inputs.
 
@@ -132,6 +134,9 @@ def create_material_from_pbr(base_image_file: str,
     tex_rough.image = bpy.data.images.load(roughness_file)
     mat.node_tree.links.new(tex_rough.outputs['Color'], bsdf.inputs['Roughness'])
 
+    if true_displacement:
+        mat.cycles.displacement_method = 'BOTH'
+
     return mat
 
 
@@ -139,6 +144,7 @@ def create_solid_material(base_color: Union[Tuple[float, float, float, float],st
                           roughness: float = 0.8,
                           metallic: float = 0.7,
                           specular: float = 0.5,
+                          emission_strength: float = 0.0,
                           name: Optional[str] = None)-> bpy.types.Material:
     """Create a solid material.
 
@@ -168,7 +174,9 @@ def create_solid_material(base_color: Union[Tuple[float, float, float, float],st
     bsdf.inputs['Roughness'].default_value = roughness
     bsdf.inputs['Metallic'].default_value = metallic
     bsdf.inputs['Specular'].default_value = specular
-    bsdf.inputs['Emission'].default_value = (0.0, 0.0, 0.0, 1.0)
+    if emission_strength > 0.0:
+        bsdf.inputs['Emission'].default_value = base_color
+        bsdf.inputs['Emission Strength'].default_value = emission_strength
     bsdf.inputs['Alpha'].default_value = base_color[3]
 
     # For workbench renderer
