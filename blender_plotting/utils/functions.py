@@ -5,7 +5,7 @@ import numpy as np
 
 from .color_scale import ColorScale
 from .curves import draw_polyline
-from .shapes import add_arrow
+from .shapes import draw_arrow
 
 def draw_real_function(f: Callable[[float], float],
                        x_min: float = -1,
@@ -76,6 +76,7 @@ def draw_vector_field(f: Callable[[float, float], Tuple[float, float]],
         if length > min_vector_magnitude:
             color=[0,0,0,1]
             color[0], color[1], color[2]  = color_scale.get_color(length, ret_type='rgb')
-            add_arrow(origin, origin+vector*vector_length/length,
+            draw_arrow(origin, origin+vector*vector_length/length,
                       thickness=vector_thickness,
                       color=color)
+
