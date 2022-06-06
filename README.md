@@ -1,10 +1,15 @@
 # 3D plots using Blender as a backend
 
 ## Plots
-<img src="imgs/vector_field.png" width="425"/> <img src="imgs/3d_point_distribution.png" width="425"/>
+
+ 2D                                     |  3D
+:--------------------------------------:|:-------------------------:
+![vector_field](imgs/vector_field.png)  |  ![3d_point_distribution](imgs/3d_point_distribution.png)
 
 ## Animations
-![slerp](imgs/slerps_workbench.mp4)
+
+https://user-images.githubusercontent.com/25606125/172133325-cc756902-511a-402e-a9aa-438f135bdd1f.mp4
+
 
 ## Build the docker file
 
