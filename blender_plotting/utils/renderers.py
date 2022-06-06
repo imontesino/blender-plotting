@@ -6,8 +6,25 @@ def bake_textures():
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
 
-def common_setup(scene: bpy.types.Scene):
+def common_setup(scene: bpy.types.Scene,
+                 resolution_x: int=1920,
+                 resolution_y: int=1080,
+                 transparent: bool=False,
+                 ):
     scene.render.use_persistent_data = True
+
+    # set resolution
+    bpy.context.scene.render.resolution_x = resolution_x
+    bpy.context.scene.render.resolution_y = resolution_y
+
+    # Performance optimizations
+    scene.render.use_sequencer = False
+    scene.render.use_compositing = False
+
+    # set transparent background
+    if transparent:
+        bpy.context.scene.render.film_transparent = transparent
+        bpy.context.scene.render.image_settings.color_mode = 'RGBA'
 
 
 def set_animation(scene: bpy.types.Scene,
@@ -40,6 +57,7 @@ def cycles_render(scene: bpy.types.Scene,
                   resolution_x: int=1920,
                   resolution_y:int =1080,
                   samples: int=128,
+                  transparent: bool=False,
                   animation: bool=False):
     """Render a scene using th Cycles engine.
 
@@ -95,10 +113,6 @@ def cycles_render(scene: bpy.types.Scene,
     # Set Optix as denoiser
     # bpy.context.scene.view_layers['View Layer'].cycles.use_denoising = True
 
-    # set resolution to 4k
-    bpy.context.scene.render.resolution_x = resolution_x
-    bpy.context.scene.render.resolution_y = resolution_y
-
     # set samples
     bpy.context.scene.cycles.samples = samples
 
@@ -108,6 +122,7 @@ def eevee_render(scene: bpy.types.Scene,
                  file_name: str,
                  resolution_x: int=1920,
                  resolution_y:int =1080,
+                 transparent: bool=False,
                  animation: bool=False):
     """Render a scene using the Eevee engine.
 
@@ -145,6 +160,7 @@ def workbench_render(scene: bpy.types.Scene,
                      file_name: str,
                      resolution_x: int=1920,
                      resolution_y: int=1080,
+                     transparent: bool=False,
                      animation: bool=False):
     """ Render a scene using the Workbench engine.
 
@@ -177,6 +193,11 @@ def workbench_render(scene: bpy.types.Scene,
     scene.render.resolution_x = resolution_x
     scene.render.resolution_y = resolution_y
     scene.render.resolution_percentage = 100
+
+    # set transparent background
+    if transparent:
+        scene.render.alpha_mode = 'TRANSPARENT'
+
     bpy.ops.render.render(write_still=1, animation=animation)
 
 
