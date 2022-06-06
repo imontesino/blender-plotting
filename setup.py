@@ -11,7 +11,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 data_files = []
-directories = glob.glob('blender_plotting/blender_cli_rendering/assets/**/*')
+directories = glob.glob('blender_plotting/resources/**/*')
 for directory in directories:
     files = glob.glob(directory+'*')
     data_files.append((directory, files))
@@ -31,6 +31,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
+    ],
+    install_requires=[
+        "numpy"
     ],
     packages=find_packages(),
     data_files=data_files,
