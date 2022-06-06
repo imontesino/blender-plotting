@@ -1,5 +1,11 @@
 # 3D plots using Blender as a backend
 
+## Plots
+<img src="imgs/vector_field.png" width="425"/> <img src="imgs/3d_point_distribution.png" width="425"/>
+
+## Animations
+![slerp](imgs/slerps_workbench.mp4)
+
 ## Build the docker file
 
 Since a specefic version of python is required it is recomended to build and use the docker images.
