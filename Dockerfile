@@ -130,19 +130,6 @@ RUN mkdir -p /home/${USER}/blender_tmp/lib
 WORKDIR /home/${USER}/blender_tmp/lib
 RUN svn checkout https://svn.blender.org/svnroot/bf-blender/tags/${BLENDER_SVN_DEPS_TAG}/lib/linux_centos7_x86_64/
 
-# # Dependencies for building the blender dependencies
-# RUN sudo apt-get install -y autoconf automake libtool yasm nasm tcl
-# # command to build dependencies
-# RUN cmake -H /build_files/build_environment \
-# 	      -B build_linux/deps \
-#           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-# 	      -DHARVEST_TARGET=/home/${USER}/blender_tmp/lib/linux/ \
-#           --log-level=ERROR
-# # build dependencies
-# RUN make -C build_linux/deps -j $(NPROCS)
-# # install dependencies
-# RUN sudo make -C build_linux/deps install
-
 WORKDIR /home/${USER}/blender_tmp/blender
 RUN make bpy
 # BUILD_CMAKE_ARGS="-D PYTHON_VERSION=${PYTHON_MAJ_MIN} -D CMAKE_POSITION_INDEPENDENT_CODE=ON -U --log-level=ERROR"

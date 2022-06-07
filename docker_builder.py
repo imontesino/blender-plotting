@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--gpu', action='store_true', help='Build container with GPU support.')
     parser.add_argument('--gpu_image', type=str, default='nvidia/cuda:11.3.0-devel-ubuntu20.04',
                         help='GPU image to use for the GPU build. IMPORTANT: must match the drivers in the host pc.')
-    parser.add_argument('--tag', '-t', type=str, default='None',
+    parser.add_argument('--tag', '-t', type=str, default=None,
                         help='Tag for the docker image.')
     parser.add_argument('--no_cache', action='store_true', help='Build without cache.')
     parser.add_argument('--builder_cpus', type=int, default=0,
@@ -55,7 +55,7 @@ def main():
     blender_version = args.blender_version
     python_version = args.python_version
     gpu_support = args.gpu
-    image_tag = args.tag
+    IMAGE_TAG = args.tag
     builder_cpus = args.builder_cpus
 
 
@@ -94,8 +94,9 @@ def main():
     BLENDER_GH_TAG = gh_tag
     BPY_STUB_VERSION = bpy_stubs
     USER = 'docker'
-    if image_tag is None:
-        IMAGE_TAG = f'bpy-{PYTHON_MAJ_MIN}'
+
+    if IMAGE_TAG is None:
+        IMAGE_TAG = f'{blender_version}-py{PYTHON_MAJ_MIN}'
     if gpu_support:
         BASE_IMAGE = args.gpu_image
         IMAGE_TAG += '-gpu'
@@ -106,7 +107,7 @@ def main():
     set_bpy_options(PYTHON_MAJ_MIN, gpu_support=gpu_support)
 
     # Build the docker image
-    build_command = f'docker build -t {IMAGE_TAG}:{blender_version}'
+    build_command = f'docker build -t bpy:{IMAGE_TAG}'
     if args.no_cache:
         build_command += ' --no-cache'
         # set number of cpus via --cpuset-mems
