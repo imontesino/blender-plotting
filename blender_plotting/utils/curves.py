@@ -39,7 +39,7 @@ def draw_polyline(points: List[Tuple[float, float, float]],
         spline = curve_data.splines.new(type='POLY')
         spline.points.add(len(points) - 1)
         for p, new_co in zip(spline.points, points):
-            p.co = (new_co + [1.0])
+            p.co = (list(new_co) + [1.0])
         bpy_curve = bpy.data.objects.new('object_name', curve_data)
         bpy_curve.data.materials.append(create_solid_material(color))
         bpy.data.scenes[0].collection.objects.link(bpy_curve)

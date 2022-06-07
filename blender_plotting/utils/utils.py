@@ -2,47 +2,11 @@
 
 import math
 from typing import Tuple
+import uuid
 
 import bpy
 
 from .node import arrange_nodes
-
-################################################################################
-# Text
-################################################################################
-
-
-def create_text(
-    scene: bpy.types.Scene,
-    body: str,
-    name: str,
-    align_x: str = 'CENTER',
-    align_y: str = 'CENTER',
-    size: float = 1.0,
-    font_name: str = "Bfont",
-    extrude: float = 0.0,
-    space_line: float = 1.0,
-    location: Tuple[float, float, float] = (0.0, 0.0, 0.0),
-    rotation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
-) -> bpy.types.Object:
-
-    new_text_data: bpy.types.Curve = bpy.data.curves.new(name=name, type='FONT')
-
-    new_text_data.body = body
-    new_text_data.align_x = align_x
-    new_text_data.align_y = align_y
-    new_text_data.size = size
-    new_text_data.font = bpy.data.fonts[font_name]
-    new_text_data.space_line = space_line
-    new_text_data.extrude = extrude
-
-    new_object: bpy.types.Object = bpy.data.objects.new(name, new_text_data)
-    scene.collection.objects.link(new_object)
-
-    new_object.location = location
-    new_object.rotation_euler = (math.pi * rotation[0] / 180.0, math.pi * rotation[1] / 180.0, math.pi * rotation[2])
-
-    return new_object
 
 
 ################################################################################

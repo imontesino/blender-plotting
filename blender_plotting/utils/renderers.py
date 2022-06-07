@@ -172,6 +172,10 @@ def workbench_render(scene: bpy.types.Scene,
     # TODO find cause
     rm_objects = remove_subsurf_modifiers(scene)
 
+    # # add exposure (workbench renders are very dark)
+    # scene.render.image_settings.view_settings.exposure *= 10
+    # scene.view_settings.exposure *= 10
+
     if animation:
         file_name = "animation/" + file_name
         scene.render.filepath = file_name+".avi"

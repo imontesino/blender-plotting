@@ -1,4 +1,4 @@
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 
 import bpy
 import numpy as np
@@ -95,6 +95,7 @@ def create_2d_scene(x_lim: Iterable[float],
 def create_3d_scene(x_lim: Tuple[float],
                     y_lim: Tuple[float],
                     z_lim: Tuple[float],
+                    camera_distance: Optional[float] = None,
                     light_energy: float = 1.0) -> Tuple[bpy.types.Scene, bpy.types.Camera]:
     """Create a 3D scene.
 
@@ -122,7 +123,8 @@ def create_3d_scene(x_lim: Tuple[float],
     ])
 
     # TODO Make camera distance dependent on the scene size
-    camera_distance = 8.0
+    if camera_distance is None:
+        camera_distance = 8.0
 
     # Camera position
     camera_theta = np.radians(20)
