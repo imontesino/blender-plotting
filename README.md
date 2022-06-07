@@ -60,7 +60,7 @@ docker cp -r belnder-plot-dev:/home/docker/blender_tmp/build_linux_bpy/bin/3.1 <
    in blender running in the background consuming a lot of processor time. If the computer starts to feel slow check
    `top` to look fo any processes with 100% CPU usage.
 
- ## See also
+ ## See also - Additional Resources
 
   - [Blender CLI Rendering](https://github.com/yuki-koyama/blender-cli-rendering) - A repo containing
     scripts and utils to render scenes using the `bpy` module.
@@ -68,3 +68,4 @@ docker cp -r belnder-plot-dev:/home/docker/blender_tmp/build_linux_bpy/bin/3.1 <
   - [Blender BPY Python3.7](https://github.com/zocker-160/blender-bpy) - Blender as Python module in a Docker container. Working with Blender 2.93 and python 3.7.
 
   - [blenderpy](https://github.com/TylerGubala/blenderpy/releases/tag/v2.91a0) - See the release page for precompiled python wheels for easy installation. Limited to Blender 2.91 and python 3.7.
+  - [Manim](https://github.com/ManimCommunity/manim) - A comunity mantained math plotting framework created by [3Blue1Brown](https://www.youtube.com/c/3blue1brown) from which this library is inspired
