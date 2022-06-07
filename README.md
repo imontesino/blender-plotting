@@ -12,7 +12,13 @@ https://user-images.githubusercontent.com/25606125/172133325-cc756902-511a-402e-
 
 https://user-images.githubusercontent.com/25606125/172375672-cd114360-959a-4e17-9086-9c0af3cba387.mp4
 
-## Build the docker file
+## Docker Image
+
+### Prebuilt Images
+
+[ignamonte/bpy](https://hub.docker.com/repository/docker/ignamonte/bpy)
+
+### Build from Dockerfile
 
 Since a specefic version of python is required it is recomended to build and use the docker images.
 
